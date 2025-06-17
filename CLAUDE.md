@@ -74,3 +74,6 @@ For detailed implementation guidance, refer to:
   - SM-2 algorithm implementation details
   - Hint system with random selection logic
   - Study session management and progress tracking
+
+## Interaction Guidelines
+- 常に日本語で回答

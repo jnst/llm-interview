@@ -110,15 +110,15 @@ export class LocalStorageManager {
     const current = allProgress[interviewId];
     
     const updated: UserProgress = {
-      interviewId,
-      lastReviewedAt: new Date(),
-      reviewCount: 0,
-      correctCount: 0,
-      intervalDays: 1,
-      easeFactor: 2.5,
-      nextReviewDate: new Date(),
-      quality: 0,
       ...current,
+      interviewId,
+      lastReviewedAt: current?.lastReviewedAt || new Date(),
+      reviewCount: current?.reviewCount || 0,
+      correctCount: current?.correctCount || 0,
+      intervalDays: current?.intervalDays || 1,
+      easeFactor: current?.easeFactor || 2.5,
+      nextReviewDate: current?.nextReviewDate || new Date(),
+      quality: current?.quality || 0,
       ...update,
     };
     

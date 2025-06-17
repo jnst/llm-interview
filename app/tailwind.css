@@ -2,9 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* ライトテーマ */
+  --primary: #3B82F6;      /* Blue-500 */
+  --secondary: #8B5CF6;    /* Purple-500 */
+  --success: #10B981;      /* Green-500 */
+  --warning: #F59E0B;      /* Amber-500 */
+  --error: #EF4444;        /* Red-500 */
+  --background: #FFFFFF;
+  --surface: #F3F4F6;
+  --text: #1F2937;
+}
+
+.dark {
+  /* ダークテーマ */
+  --primary: #60A5FA;      /* Blue-400 */
+  --secondary: #A78BFA;    /* Purple-400 */
+  --background: #111827;
+  --surface: #1F2937;
+  --text: #F9FAFB;
+}
+
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+  @apply bg-background text-text;
 
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
