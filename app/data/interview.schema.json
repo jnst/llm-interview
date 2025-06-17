@@ -1,0 +1,129 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Interview Question Schema",
+  "type": "object",
+  "required": [
+    "id",
+    "question",
+    "answer",
+    "category",
+    "difficulty",
+    "tags",
+    "source"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "質問の一意識別子",
+      "pattern": "^[a-zA-Z0-9_]+$"
+    },
+    "question": {
+      "type": "string",
+      "description": "質問文",
+      "minLength": 1
+    },
+    "answer": {
+      "type": "object",
+      "description": "回答の詳細情報",
+      "required": [
+        "definition",
+        "importance",
+        "mechanism",
+        "key_points",
+        "examples",
+        "applications",
+        "advantages",
+        "limitations",
+        "formulas",
+        "related_concepts",
+        "additional_notes"
+      ],
+      "properties": {
+        "definition": {
+          "type": "string",
+          "description": "定義・概要"
+        },
+        "importance": {
+          "type": "string",
+          "description": "重要性・理由"
+        },
+        "mechanism": {
+          "type": "string",
+          "description": "仕組み・動作原理"
+        },
+        "key_points": {
+          "type": "array",
+          "description": "要点リスト",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "examples": {
+          "type": "array",
+          "description": "具体例リスト",
+          "items": {
+            "type": "string"
+          }
+        },
+        "applications": {
+          "type": "string",
+          "description": "応用例・使用場面"
+        },
+        "advantages": {
+          "type": "string",
+          "description": "利点・メリット"
+        },
+        "limitations": {
+          "type": "string",
+          "description": "制限・課題"
+        },
+        "formulas": {
+          "type": "array",
+          "description": "数式やアルゴリズム",
+          "items": {
+            "type": "string"
+          }
+        },
+        "related_concepts": {
+          "type": "string",
+          "description": "関連概念"
+        },
+        "additional_notes": {
+          "type": "string",
+          "description": "補足説明"
+        }
+      }
+    },
+    "category": {
+      "type": "string",
+      "description": "カテゴリ名",
+      "enum": [
+        "基礎概念",
+        "アーキテクチャ",
+        "学習手法",
+        "応用技術",
+        "評価指標",
+        "実装技術",
+        "倫理・社会的影響"
+      ]
+    },
+    "difficulty": {
+      "type": "string",
+      "description": "難易度",
+      "enum": ["初級", "中級", "上級"]
+    },
+    "tags": {
+      "type": "array",
+      "description": "タグリスト",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "source": {
+      "type": "string",
+      "description": "出典情報"
+    }
+  }
+}
