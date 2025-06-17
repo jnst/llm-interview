@@ -156,9 +156,25 @@ export default function SessionStudy() {
 
   // ActionDataの処理
   useEffect(() => {
-    if (actionData && 'success' in actionData && actionData.success && 'session' in actionData && actionData.session) {
-      setSession(actionData.session)
-      if ('ended' in actionData && actionData.ended) {
+    if (
+      actionData &&
+      "success" in actionData &&
+      actionData.success &&
+      "session" in actionData &&
+      actionData.session
+    ) {
+      // Dateオブジェクトを復元
+      const sessionWithDates = {
+        ...actionData.session,
+        startedAt: new Date(actionData.session.startedAt),
+        endedAt: actionData.session.endedAt ? new Date(actionData.session.endedAt) : undefined,
+        reviewedInterviews: actionData.session.reviewedInterviews.map(review => ({
+          ...review,
+          reviewedAt: new Date(review.reviewedAt)
+        }))
+      }
+      setSession(sessionWithDates)
+      if ("ended" in actionData && actionData.ended) {
         // セッション終了時の処理
         navigate("/", { replace: true })
       }
@@ -333,7 +349,7 @@ export default function SessionStudy() {
       {/* メインコンテンツ */}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          {actionData && 'error' in actionData && actionData.error && (
+          {actionData && "error" in actionData && actionData.error && (
             <Card className="mb-4 border-error">
               <div className="text-error text-center">{actionData.error}</div>
             </Card>

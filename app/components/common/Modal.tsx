@@ -59,7 +59,7 @@ const Modal = ({
     xl: "max-w-xl",
   } as const
 
-  const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleOverlayClick = (event: React.MouseEvent<HTMLDialogElement>) => {
     if (closeOnOverlayClick && event.target === event.currentTarget) {
       onClose()
     }

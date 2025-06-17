@@ -17,8 +17,8 @@ const CardBack = ({ interview, hintsUsed }: CardBackProps) => {
         <h4 className="font-semibold text-text mb-2">{title}:</h4>
         {Array.isArray(content) ? (
           <ul className="list-disc list-inside space-y-1 text-sm text-gray-700 dark:text-gray-300">
-            {content.map((item, index) => (
-              <li key={`${title}-${index}`}>{item}</li>
+            {content.map((item) => (
+              <li key={`${title}-${item}`}>{item}</li>
             ))}
           </ul>
         ) : (

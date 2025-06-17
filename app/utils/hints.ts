@@ -35,7 +35,7 @@ export class HintManager {
     let selectedExample = ""
 
     // ヒント1: 定義（固定）
-    if (answer.definition && answer.definition.trim()) {
+    if (answer.definition?.trim()) {
       hints.push({
         type: "definition",
         content: answer.definition.trim(),
@@ -45,7 +45,7 @@ export class HintManager {
     // ヒント2: 要点からランダムに2つ選出
     if (answer.key_points && answer.key_points.length > 0) {
       const availablePoints = answer.key_points.filter(
-        (point) => point && point.trim()
+        (point) => point?.trim()
       )
 
       if (availablePoints.length >= 2) {
@@ -70,7 +70,7 @@ export class HintManager {
     // ヒント3: 具体例からランダムに1つ選出
     if (answer.examples && answer.examples.length > 0) {
       const availableExamples = answer.examples.filter(
-        (example) => example && example.trim()
+        (example) => example?.trim()
       )
 
       if (availableExamples.length > 0) {
@@ -257,6 +257,6 @@ export const defaultHintManager = new HintManager()
 
 // ヒント生成関数（後方互換性のため）
 export function generateHints(answer: Answer): string[] {
-  const hintSet = defaultHintManager.generateHints('temp', answer)
-  return hintSet.hints.map(hint => hint.content)
+  const hintSet = defaultHintManager.generateHints("temp", answer)
+  return hintSet.hints.map((hint) => hint.content)
 }

@@ -104,8 +104,8 @@ export default function Settings() {
 
   // ActionDataの処理
   useEffect(() => {
-    if (actionData && 'success' in actionData && actionData.success) {
-      if ('settings' in actionData && actionData.settings) {
+    if (actionData && "success" in actionData && actionData.success) {
+      if ("settings" in actionData && actionData.settings) {
         LocalStorageManager.setSettings(actionData.settings)
         setSettings(actionData.settings)
 
@@ -116,16 +116,16 @@ export default function Settings() {
         )
       }
 
-      if ('export' in actionData && actionData.export) {
+      if ("export" in actionData && actionData.export) {
         LocalStorageManager.exportData()
       }
 
-      if ('reset' in actionData && actionData.reset) {
+      if ("reset" in actionData && actionData.reset) {
         LocalStorageManager.clearProgress()
         setShowResetModal(false)
       }
 
-      if ('resetAll' in actionData && actionData.resetAll) {
+      if ("resetAll" in actionData && actionData.resetAll) {
         LocalStorageManager.clearAllData()
         setShowResetAllModal(false)
         // 設定をデフォルトに戻す
@@ -188,7 +188,7 @@ export default function Settings() {
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto space-y-6">
           {/* メッセージ表示 */}
-          {actionData && 'message' in actionData && actionData.message && (
+          {actionData && "message" in actionData && actionData.message && (
             <Card className="border-success">
               <div className="text-success text-center">
                 {actionData.message}
@@ -196,7 +196,7 @@ export default function Settings() {
             </Card>
           )}
 
-          {actionData && 'error' in actionData && actionData.error && (
+          {actionData && "error" in actionData && actionData.error && (
             <Card className="border-error">
               <div className="text-error text-center">{actionData.error}</div>
             </Card>

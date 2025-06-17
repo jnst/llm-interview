@@ -30,6 +30,28 @@ export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData()
   const action = formData.get("_action")
 
+  if (action === "start_quick_session") {
+    // クイック学習セッション（デフォルト設定）
+    const interviews: Interview[] = await import("~/data/interview.json").then(
+      (module) => (module.default || module) as Interview[]
+    )
+
+    const config: SessionStartConfig = {
+      maxCards: 20,
+      includeNew: true,
+      includeReview: true,
+      categories: [],
+      difficulties: [],
+    }
+
+    try {
+      const session = defaultStudyManager.startStudySession(interviews, config)
+      return redirect(`/interview/${session.id}`)
+    } catch (error) {
+      return json({ error: "セッションの開始に失敗しました" }, { status: 400 })
+    }
+  }
+
   if (action === "start_session") {
     // セッション設定を取得
     const maxCards = Number.parseInt(formData.get("maxCards") as string) || 20
@@ -159,7 +181,10 @@ export default function InterviewIndex() {
                   学習カード数
                 </h3>
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-text" htmlFor="maxCards">
+                  <label
+                    className="block text-sm font-medium text-text"
+                    htmlFor="maxCards"
+                  >
                     1セッションあたりのカード数
                   </label>
                   <input
@@ -330,6 +355,19 @@ export default function InterviewIndex() {
               >
                 学習を開始する
               </Button>
+              <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                または
+              </div>
+              <Form method="post" action="/interview">
+                <input
+                  type="hidden"
+                  name="_action"
+                  value="start_quick_session"
+                />
+                <Button type="submit" variant="ghost" fullWidth>
+                  デフォルト設定で開始
+                </Button>
+              </Form>
               <Link to="/">
                 <Button variant="ghost" fullWidth>
                   ホームに戻る

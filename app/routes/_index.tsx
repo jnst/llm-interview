@@ -3,7 +3,7 @@ import {
   type MetaFunction,
   json,
 } from "@remix-run/node"
-import { Link, useLoaderData, useRouteError } from "@remix-run/react"
+import { Form, Link, useLoaderData, useRouteError } from "@remix-run/react"
 import { useEffect, useState } from "react"
 import Button from "~/components/common/Button"
 import Card from "~/components/common/Card"
@@ -67,11 +67,6 @@ export default function Index() {
     // コンポーネントマウント後に計算
     calculateStats()
   }, [interviews])
-
-  const handleStartStudy = () => {
-    // 学習開始 - 新規セッションを開始
-    window.location.href = "/interview"
-  }
 
   if (isLoading) {
     return (
@@ -184,14 +179,17 @@ export default function Index() {
 
           {/* 学習開始ボタン */}
           <div className="text-center">
-            <Button
-              onClick={handleStartStudy}
-              size="lg"
-              fullWidth
-              className="text-lg font-semibold py-4"
-            >
-              学習を開始する
-            </Button>
+            <Form method="post" action="/interview">
+              <input type="hidden" name="_action" value="start_quick_session" />
+              <Button
+                type="submit"
+                size="lg"
+                fullWidth
+                className="text-lg font-semibold py-4"
+              >
+                学習を開始する
+              </Button>
+            </Form>
           </div>
 
           {/* カテゴリー別進捗 */}
