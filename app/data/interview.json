@@ -315,10 +315,7 @@
       "applications": "モバイルアプリ、エッジAI、大規模モデルのサービング、リアルタイム推論システム。",
       "advantages": "1. モデルサイズを1/4〜1/8に削減\n2. 推論速度の向上\n3. メモリ使用量の削減\n4. 消費電力の削減",
       "limitations": "1. 精度の低下（特に極端な量子化）\n2. 量子化が困難な層の存在\n3. ハードウェア依存性\n4. 追加の最適化作業が必要",
-      "formulas": [
-        "q = round(r/S) + Z",
-        "r = S(q - Z)"
-      ],
+      "formulas": ["q = round(r/S) + Z", "r = S(q - Z)"],
       "related_concepts": "知識蒸留、プルーニング、モデル圧縮、Mixed Precision Training",
       "additional_notes": "最新の研究では、1bit（バイナリ）量子化やTernary量子化なども研究されています。また、量子化とLoRAを組み合わせたQLoRAも注目されています。"
     },
@@ -349,9 +346,7 @@
       "applications": "対話システム、アシスタント、コード生成、創造的な文章作成、教育支援など。",
       "advantages": "1. 人間の意図との整合性向上\n2. 有害な出力の削減\n3. より自然な対話\n4. タスク遂行能力の向上",
       "limitations": "1. 人間のフィードバックのコスト\n2. 報酬ハッキングのリスク\n3. 過度な安全性による有用性低下\n4. バイアスの混入可能性",
-      "formulas": [
-        "J(θ) = E[R(s,a) - β×KL(π_θ||π_ref)]"
-      ],
+      "formulas": ["J(θ) = E[R(s,a) - β×KL(π_θ||π_ref)]"],
       "related_concepts": "SFT、PPO、DPO、Constitutional AI、Red Teaming",
       "additional_notes": "最近では、DPO（Direct Preference Optimization）のような、RLを使わない選好最適化手法も提案されており、より効率的な学習が可能になっています。"
     },
@@ -477,10 +472,7 @@
       "applications": "モデル選択、ハイパーパラメータチューニング、学習の収束判定、ドメイン適応の評価など。",
       "advantages": "1. 計算が簡単\n2. 理論的な基盤\n3. 自動計算可能\n4. 言語非依存",
       "limitations": "1. 短い文で不安定\n2. 生成品質を直接反映しない\n3. トークナイザー依存\n4. ドメイン間で比較困難",
-      "formulas": [
-        "PPL = exp(-1/N × Σlog P(w_i|w_{<i}))",
-        "PPL = exp(H(P))"
-      ],
+      "formulas": ["PPL = exp(-1/N × Σlog P(w_i|w_{<i}))", "PPL = exp(H(P))"],
       "related_concepts": "Cross-entropy、Bits per character、Log-likelihood、Entropy",
       "additional_notes": "Perplexityは言語モデルの固有の評価指標ですが、実際のタスク性能とは必ずしも相関しないため、タスク固有の評価も重要です。"
     },

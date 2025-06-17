@@ -1,22 +1,22 @@
-import type { Answer } from "~/types/interview";
+import type { Answer } from "~/types/interview"
 
 export interface Hint {
-  type: "definition" | "key_points" | "example";
-  content: string;
+  type: "definition" | "key_points" | "example"
+  content: string
 }
 
 export interface HintSet {
-  interviewId: string;
-  hints: Hint[];
-  selectedKeyPoints: string[];
-  selectedExample: string;
+  interviewId: string
+  hints: Hint[]
+  selectedKeyPoints: string[]
+  selectedExample: string
 }
 
 /**
  * ヒント生成とランダム選出を管理するクラス
  */
 export class HintManager {
-  private hintSets: Map<string, HintSet> = new Map();
+  private hintSets: Map<string, HintSet> = new Map()
 
   /**
    * 指定された質問のヒントセットを生成
@@ -27,52 +27,58 @@ export class HintManager {
   public generateHints(interviewId: string, answer: Answer): HintSet {
     // 既に生成済みの場合は既存のものを返す（セッション中は固定）
     if (this.hintSets.has(interviewId)) {
-      return this.hintSets.get(interviewId)!;
+      return this.hintSets.get(interviewId)!
     }
 
-    const hints: Hint[] = [];
-    let selectedKeyPoints: string[] = [];
-    let selectedExample = "";
+    const hints: Hint[] = []
+    let selectedKeyPoints: string[] = []
+    let selectedExample = ""
 
     // ヒント1: 定義（固定）
     if (answer.definition && answer.definition.trim()) {
       hints.push({
         type: "definition",
-        content: answer.definition.trim()
-      });
+        content: answer.definition.trim(),
+      })
     }
 
     // ヒント2: 要点からランダムに2つ選出
     if (answer.key_points && answer.key_points.length > 0) {
-      const availablePoints = answer.key_points.filter(point => point && point.trim());
-      
+      const availablePoints = answer.key_points.filter(
+        (point) => point && point.trim()
+      )
+
       if (availablePoints.length >= 2) {
         // ランダムに2つ選出
-        selectedKeyPoints = this.selectRandomItems(availablePoints, 2);
+        selectedKeyPoints = this.selectRandomItems(availablePoints, 2)
       } else if (availablePoints.length === 1) {
         // 1つしかない場合はそれを使用
-        selectedKeyPoints = [availablePoints[0]];
+        selectedKeyPoints = [availablePoints[0]]
       }
 
       if (selectedKeyPoints.length > 0) {
-        const keyPointsContent = selectedKeyPoints.map(point => `• ${point}`).join('\n');
+        const keyPointsContent = selectedKeyPoints
+          .map((point) => `• ${point}`)
+          .join("\n")
         hints.push({
           type: "key_points",
-          content: keyPointsContent
-        });
+          content: keyPointsContent,
+        })
       }
     }
 
     // ヒント3: 具体例からランダムに1つ選出
     if (answer.examples && answer.examples.length > 0) {
-      const availableExamples = answer.examples.filter(example => example && example.trim());
-      
+      const availableExamples = answer.examples.filter(
+        (example) => example && example.trim()
+      )
+
       if (availableExamples.length > 0) {
-        selectedExample = this.selectRandomItems(availableExamples, 1)[0];
+        selectedExample = this.selectRandomItems(availableExamples, 1)[0]
         hints.push({
           type: "example",
-          content: selectedExample
-        });
+          content: selectedExample,
+        })
       }
     }
 
@@ -80,13 +86,13 @@ export class HintManager {
       interviewId,
       hints,
       selectedKeyPoints,
-      selectedExample
-    };
+      selectedExample,
+    }
 
     // セッション中は同じヒントを使用するためキャッシュ
-    this.hintSets.set(interviewId, hintSet);
+    this.hintSets.set(interviewId, hintSet)
 
-    return hintSet;
+    return hintSet
   }
 
   /**
@@ -96,8 +102,8 @@ export class HintManager {
    * @returns ランダムに選出されたアイテムの配列
    */
   private selectRandomItems<T>(items: T[], count: number): T[] {
-    const shuffled = [...items].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, Math.min(count, items.length));
+    const shuffled = [...items].sort(() => Math.random() - 0.5)
+    return shuffled.slice(0, Math.min(count, items.length))
   }
 
   /**
@@ -107,11 +113,11 @@ export class HintManager {
    * @returns ヒント、または存在しない場合はnull
    */
   public getHint(interviewId: string, hintIndex: number): Hint | null {
-    const hintSet = this.hintSets.get(interviewId);
+    const hintSet = this.hintSets.get(interviewId)
     if (!hintSet || hintIndex >= hintSet.hints.length || hintIndex < 0) {
-      return null;
+      return null
     }
-    return hintSet.hints[hintIndex];
+    return hintSet.hints[hintIndex]
   }
 
   /**
@@ -120,8 +126,8 @@ export class HintManager {
    * @returns ヒント数
    */
   public getHintCount(interviewId: string): number {
-    const hintSet = this.hintSets.get(interviewId);
-    return hintSet ? hintSet.hints.length : 0;
+    const hintSet = this.hintSets.get(interviewId)
+    return hintSet ? hintSet.hints.length : 0
   }
 
   /**
@@ -130,8 +136,8 @@ export class HintManager {
    * @returns ヒントの配列
    */
   public getAllHints(interviewId: string): Hint[] {
-    const hintSet = this.hintSets.get(interviewId);
-    return hintSet ? [...hintSet.hints] : [];
+    const hintSet = this.hintSets.get(interviewId)
+    return hintSet ? [...hintSet.hints] : []
   }
 
   /**
@@ -143,16 +149,16 @@ export class HintManager {
     const titles = {
       definition: "💡 定義・概要",
       key_points: "📝 重要なポイント",
-      example: "📋 具体例"
-    };
-    return titles[hintType];
+      example: "📋 具体例",
+    }
+    return titles[hintType]
   }
 
   /**
    * ヒントキャッシュをクリア（新しいセッション開始時に使用）
    */
   public clearCache(): void {
-    this.hintSets.clear();
+    this.hintSets.clear()
   }
 
   /**
@@ -160,7 +166,7 @@ export class HintManager {
    * @param interviewId 質問ID
    */
   public clearHintForInterview(interviewId: string): void {
-    this.hintSets.delete(interviewId);
+    this.hintSets.delete(interviewId)
   }
 
   /**
@@ -169,9 +175,12 @@ export class HintManager {
    * @param totalHints 利用可能な総ヒント数
    * @returns ヒント使用率
    */
-  public static calculateHintUsageRate(hintCount: number, totalHints: number): number {
-    if (totalHints === 0) return 0;
-    return Math.round((hintCount / totalHints) * 100);
+  public static calculateHintUsageRate(
+    hintCount: number,
+    totalHints: number
+  ): number {
+    if (totalHints === 0) return 0
+    return Math.round((hintCount / totalHints) * 100)
   }
 
   /**
@@ -180,9 +189,12 @@ export class HintManager {
    * @param hintsUsed 使用したヒント数
    * @returns 調整後の品質評価
    */
-  public static adjustQualityForHints(originalQuality: number, hintsUsed: number): number {
+  public static adjustQualityForHints(
+    originalQuality: number,
+    hintsUsed: number
+  ): number {
     // ヒント1つにつき-1点（最低0点）
-    return Math.max(0, originalQuality - hintsUsed);
+    return Math.max(0, originalQuality - hintsUsed)
   }
 
   /**
@@ -191,14 +203,17 @@ export class HintManager {
    * @param difficulty 質問の難易度
    * @returns ヒント表示を推奨するかどうか
    */
-  public static shouldSuggestHint(responseTime: number, difficulty: "初級" | "中級" | "上級"): boolean {
+  public static shouldSuggestHint(
+    responseTime: number,
+    difficulty: "初級" | "中級" | "上級"
+  ): boolean {
     const thresholds = {
-      "初級": 30,  // 30秒
-      "中級": 45,  // 45秒  
-      "上級": 60   // 60秒
-    };
+      初級: 30, // 30秒
+      中級: 45, // 45秒
+      上級: 60, // 60秒
+    }
 
-    return responseTime >= thresholds[difficulty];
+    return responseTime >= thresholds[difficulty]
   }
 
   /**
@@ -206,29 +221,42 @@ export class HintManager {
    * @param reviewedInterviews 学習済みの質問配列
    * @returns ヒント使用統計
    */
-  public generateHintStatistics(reviewedInterviews: { interviewId: string; hintsShown: number }[]) {
+  public generateHintStatistics(
+    reviewedInterviews: { interviewId: string; hintsShown: number }[]
+  ) {
     if (reviewedInterviews.length === 0) {
       return {
         totalHintsUsed: 0,
         averageHintsPerCard: 0,
         hintsUsageRate: 0,
-        cardsWithHints: 0
-      };
+        cardsWithHints: 0,
+      }
     }
 
-    const totalHintsUsed = reviewedInterviews.reduce((sum, review) => sum + review.hintsShown, 0);
-    const cardsWithHints = reviewedInterviews.filter(review => review.hintsShown > 0).length;
-    const averageHintsPerCard = totalHintsUsed / reviewedInterviews.length;
-    const hintsUsageRate = (cardsWithHints / reviewedInterviews.length) * 100;
+    const totalHintsUsed = reviewedInterviews.reduce(
+      (sum, review) => sum + review.hintsShown,
+      0
+    )
+    const cardsWithHints = reviewedInterviews.filter(
+      (review) => review.hintsShown > 0
+    ).length
+    const averageHintsPerCard = totalHintsUsed / reviewedInterviews.length
+    const hintsUsageRate = (cardsWithHints / reviewedInterviews.length) * 100
 
     return {
       totalHintsUsed,
       averageHintsPerCard: Math.round(averageHintsPerCard * 10) / 10,
       hintsUsageRate: Math.round(hintsUsageRate),
-      cardsWithHints
-    };
+      cardsWithHints,
+    }
   }
 }
 
 // デフォルトのHintManagerインスタンス
-export const defaultHintManager = new HintManager();
+export const defaultHintManager = new HintManager()
+
+// ヒント生成関数（後方互換性のため）
+export function generateHints(answer: Answer): string[] {
+  const hintSet = defaultHintManager.generateHints('temp', answer)
+  return hintSet.hints.map(hint => hint.content)
+}

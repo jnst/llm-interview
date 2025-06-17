@@ -1,15 +1,16 @@
-import type { Interview } from '~/types/interview';
+import type { Interview } from "~/types/interview"
 
 export interface CardBackProps {
-  interview: Interview;
-  hintsUsed: number;
+  interview: Interview
+  hintsUsed: number
 }
 
 const CardBack = ({ interview, hintsUsed }: CardBackProps) => {
-  const { answer } = interview;
+  const { answer } = interview
 
   const renderSection = (title: string, content: string | string[]) => {
-    if (!content || (Array.isArray(content) && content.length === 0)) return null;
+    if (!content || (Array.isArray(content) && content.length === 0))
+      return null
 
     return (
       <div className="mb-4">
@@ -17,7 +18,7 @@ const CardBack = ({ interview, hintsUsed }: CardBackProps) => {
         {Array.isArray(content) ? (
           <ul className="list-disc list-inside space-y-1 text-sm text-gray-700 dark:text-gray-300">
             {content.map((item, index) => (
-              <li key={index}>{item}</li>
+              <li key={`${title}-${index}`}>{item}</li>
             ))}
           </ul>
         ) : (
@@ -26,44 +27,44 @@ const CardBack = ({ interview, hintsUsed }: CardBackProps) => {
           </p>
         )}
       </div>
-    );
-  };
+    )
+  }
 
   return (
     <div className="h-full overflow-y-auto">
       <div className="space-y-4">
         {/* 定義・概要 */}
-        {renderSection('定義', answer.definition)}
+        {renderSection("定義", answer.definition)}
 
         {/* 重要性 */}
-        {renderSection('重要性', answer.importance)}
+        {renderSection("重要性", answer.importance)}
 
         {/* 仕組み・動作原理 */}
-        {renderSection('仕組み', answer.mechanism)}
+        {renderSection("仕組み", answer.mechanism)}
 
         {/* 要点 */}
-        {renderSection('要点', answer.key_points)}
+        {renderSection("要点", answer.key_points)}
 
         {/* 具体例 */}
-        {renderSection('具体例', answer.examples)}
+        {renderSection("具体例", answer.examples)}
 
         {/* 応用例 */}
-        {renderSection('応用例', answer.applications)}
+        {renderSection("応用例", answer.applications)}
 
         {/* 利点・メリット */}
-        {renderSection('利点', answer.advantages)}
+        {renderSection("利点", answer.advantages)}
 
         {/* 制限・課題 */}
-        {renderSection('制限', answer.limitations)}
+        {renderSection("制限", answer.limitations)}
 
         {/* 数式やアルゴリズム */}
-        {renderSection('数式・アルゴリズム', answer.formulas)}
+        {renderSection("数式・アルゴリズム", answer.formulas)}
 
         {/* 関連概念 */}
-        {renderSection('関連概念', answer.related_concepts)}
+        {renderSection("関連概念", answer.related_concepts)}
 
         {/* 補足説明 */}
-        {renderSection('補足', answer.additional_notes)}
+        {renderSection("補足", answer.additional_notes)}
 
         {/* ヒント使用表示 */}
         {hintsUsed > 0 && (
@@ -87,7 +88,7 @@ const CardBack = ({ interview, hintsUsed }: CardBackProps) => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CardBack;
+export default CardBack

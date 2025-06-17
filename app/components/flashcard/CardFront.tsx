@@ -1,29 +1,29 @@
-import type { Interview } from '~/types/interview';
-import Button from '../common/Button';
+import type { Interview } from "~/types/interview"
+import Button from "../common/Button"
 
 export interface CardFrontProps {
-  interview: Interview;
-  showHint: boolean;
-  currentHint?: string;
-  totalHints: number;
-  currentHintIndex: number;
-  onToggleHint: () => void;
-  onHideHint: () => void;
-  onFlip: () => void;
+  interview: Interview
+  showHint: boolean
+  currentHint?: string
+  totalHints: number
+  currentHintIndex: number
+  onToggleHint: () => void
+  onHideHint: () => void
+  onFlip: () => void
 }
 
 const getDifficultyStars = (difficulty: string): string => {
   switch (difficulty) {
-    case '初級':
-      return '★☆☆';
-    case '中級':
-      return '★★☆';
-    case '上級':
-      return '★★★';
+    case "初級":
+      return "★☆☆"
+    case "中級":
+      return "★★☆"
+    case "上級":
+      return "★★★"
     default:
-      return '★☆☆';
+      return "★☆☆"
   }
-};
+}
 
 const CardFront = ({
   interview,
@@ -33,7 +33,7 @@ const CardFront = ({
   currentHintIndex,
   onToggleHint,
   onHideHint,
-  onFlip
+  onFlip,
 }: CardFrontProps) => {
   return (
     <div className="h-full flex flex-col">
@@ -72,9 +72,11 @@ const CardFront = ({
                 clipRule="evenodd"
               />
             </svg>
-            <span>ヒント {currentHintIndex + 1}/{totalHints}:</span>
+            <span>
+              ヒント {currentHintIndex + 1}/{totalHints}:
+            </span>
           </div>
-          
+
           <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
             <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">
               {currentHint}
@@ -83,19 +85,11 @@ const CardFront = ({
 
           <div className="flex gap-2 justify-center">
             {currentHintIndex < totalHints - 1 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onToggleHint}
-              >
+              <Button variant="ghost" size="sm" onClick={onToggleHint}>
                 次のヒント
               </Button>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onHideHint}
-            >
+            <Button variant="ghost" size="sm" onClick={onHideHint}>
               ヒントを隠す
             </Button>
           </div>
@@ -141,7 +135,7 @@ const CardFront = ({
         </Button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CardFront;
+export default CardFront

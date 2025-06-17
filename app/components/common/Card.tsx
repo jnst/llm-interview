@@ -1,50 +1,52 @@
-import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
+import { type HTMLAttributes, type ReactNode, forwardRef } from "react"
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'elevated' | 'outlined';
-  padding?: 'none' | 'sm' | 'md' | 'lg';
-  interactive?: boolean;
-  children: ReactNode;
+  variant?: "default" | "elevated" | "outlined"
+  padding?: "none" | "sm" | "md" | "lg"
+  interactive?: boolean
+  children: ReactNode
 }
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
   (
     {
-      variant = 'default',
-      padding = 'md',
+      variant = "default",
+      padding = "md",
       interactive = false,
       children,
-      className = '',
+      className = "",
       ...props
     },
     ref
   ) => {
-    const baseClasses = 'bg-surface rounded-lg transition-all duration-300';
+    const baseClasses = "bg-surface rounded-lg transition-all duration-300"
 
     const variantClasses = {
-      default: 'border border-gray-200 dark:border-gray-700',
-      elevated: 'shadow-md hover:shadow-lg',
-      outlined: 'border-2 border-gray-300 dark:border-gray-600'
-    } as const;
+      default: "border border-gray-200 dark:border-gray-700",
+      elevated: "shadow-md hover:shadow-lg",
+      outlined: "border-2 border-gray-300 dark:border-gray-600",
+    } as const
 
     const paddingClasses = {
-      none: '',
-      sm: 'p-3',
-      md: 'p-4',
-      lg: 'p-6'
-    } as const;
+      none: "",
+      sm: "p-3",
+      md: "p-4",
+      lg: "p-6",
+    } as const
 
     const interactiveClasses = interactive
-      ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
-      : '';
+      ? "cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+      : ""
 
     const classes = [
       baseClasses,
       variantClasses[variant],
       paddingClasses[padding],
       interactiveClasses,
-      className
-    ].filter(Boolean).join(' ');
+      className,
+    ]
+      .filter(Boolean)
+      .join(" ")
 
     return (
       <div
@@ -55,10 +57,10 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       >
         {children}
       </div>
-    );
+    )
   }
-);
+)
 
-Card.displayName = 'Card';
+Card.displayName = "Card"
 
-export default Card;
+export default Card

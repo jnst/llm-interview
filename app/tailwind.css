@@ -4,23 +4,23 @@
 
 :root {
   /* ライトテーマ */
-  --primary: #3B82F6;      /* Blue-500 */
-  --secondary: #8B5CF6;    /* Purple-500 */
-  --success: #10B981;      /* Green-500 */
-  --warning: #F59E0B;      /* Amber-500 */
-  --error: #EF4444;        /* Red-500 */
-  --background: #FFFFFF;
-  --surface: #F3F4F6;
-  --text: #1F2937;
+  --primary: #3b82f6; /* Blue-500 */
+  --secondary: #8b5cf6; /* Purple-500 */
+  --success: #10b981; /* Green-500 */
+  --warning: #f59e0b; /* Amber-500 */
+  --error: #ef4444; /* Red-500 */
+  --background: #ffffff;
+  --surface: #f3f4f6;
+  --text: #1f2937;
 }
 
 .dark {
   /* ダークテーマ */
-  --primary: #60A5FA;      /* Blue-400 */
-  --secondary: #A78BFA;    /* Purple-400 */
+  --primary: #60a5fa; /* Blue-400 */
+  --secondary: #a78bfa; /* Purple-400 */
   --background: #111827;
-  --surface: #1F2937;
-  --text: #F9FAFB;
+  --surface: #1f2937;
+  --text: #f9fafb;
 }
 
 html,

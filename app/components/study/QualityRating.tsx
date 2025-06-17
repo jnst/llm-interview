@@ -1,33 +1,69 @@
-import { useState } from 'react';
-import Button from '../common/Button';
+import { useState } from "react"
+import Button from "../common/Button"
 
 export interface QualityRatingProps {
-  onRate: (quality: number) => void;
-  disabled?: boolean;
-  initialValue?: number;
+  onRate: (quality: number) => void
+  disabled?: boolean
+  initialValue?: number
 }
 
 const QUALITY_LABELS = [
-  { value: 0, label: '忘れた', description: '完全に忘れた', color: 'bg-red-500' },
-  { value: 1, label: '見覚え', description: '間違えたが、見覚えはある', color: 'bg-red-400' },
-  { value: 2, label: '近かった', description: '間違えたが、正解に近かった', color: 'bg-orange-400' },
-  { value: 3, label: '時間要', description: '正解したが、思い出すのに時間がかかった', color: 'bg-yellow-400' },
-  { value: 4, label: '少し迷った', description: '正解したが、少し迷った', color: 'bg-green-400' },
-  { value: 5, label: '完璧', description: '即座に正解した', color: 'bg-green-500' }
-] as const;
+  {
+    value: 0,
+    label: "忘れた",
+    description: "完全に忘れた",
+    color: "bg-red-500",
+  },
+  {
+    value: 1,
+    label: "見覚え",
+    description: "間違えたが、見覚えはある",
+    color: "bg-red-400",
+  },
+  {
+    value: 2,
+    label: "近かった",
+    description: "間違えたが、正解に近かった",
+    color: "bg-orange-400",
+  },
+  {
+    value: 3,
+    label: "時間要",
+    description: "正解したが、思い出すのに時間がかかった",
+    color: "bg-yellow-400",
+  },
+  {
+    value: 4,
+    label: "少し迷った",
+    description: "正解したが、少し迷った",
+    color: "bg-green-400",
+  },
+  {
+    value: 5,
+    label: "完璧",
+    description: "即座に正解した",
+    color: "bg-green-500",
+  },
+] as const
 
-const QualityRating = ({ onRate, disabled = false, initialValue }: QualityRatingProps) => {
-  const [selectedValue, setSelectedValue] = useState<number | null>(initialValue ?? null);
-  const [hoveredValue, setHoveredValue] = useState<number | null>(null);
+const QualityRating = ({
+  onRate,
+  disabled = false,
+  initialValue,
+}: QualityRatingProps) => {
+  const [selectedValue, setSelectedValue] = useState<number | null>(
+    initialValue ?? null
+  )
+  const [hoveredValue, setHoveredValue] = useState<number | null>(null)
 
   const handleSelect = (quality: number) => {
-    if (disabled) return;
-    
-    setSelectedValue(quality);
-    onRate(quality);
-  };
+    if (disabled) return
 
-  const displayValue = hoveredValue !== null ? hoveredValue : selectedValue;
+    setSelectedValue(quality)
+    onRate(quality)
+  }
+
+  const displayValue = hoveredValue !== null ? hoveredValue : selectedValue
 
   return (
     <div className="space-y-4">
@@ -47,17 +83,19 @@ const QualityRating = ({ onRate, disabled = false, initialValue }: QualityRating
         {QUALITY_LABELS.map((item) => (
           <button
             key={item.value}
+            type="button"
             onClick={() => handleSelect(item.value)}
             onMouseEnter={() => !disabled && setHoveredValue(item.value)}
             onMouseLeave={() => !disabled && setHoveredValue(null)}
             disabled={disabled}
             className={`
               flex flex-col items-center justify-center w-16 h-16 rounded-lg border-2 transition-all duration-200
-              ${selectedValue === item.value
-                ? `${item.color} border-gray-800 dark:border-gray-200 text-white shadow-lg`
-                : 'bg-surface border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+              ${
+                selectedValue === item.value
+                  ? `${item.color} border-gray-800 dark:border-gray-200 text-white shadow-lg`
+                  : "bg-surface border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
               }
-              ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105'}
+              ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:scale-105"}
               focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
             `}
             aria-label={`品質評価 ${item.value}: ${item.description}`}
@@ -76,10 +114,10 @@ const QualityRating = ({ onRate, disabled = false, initialValue }: QualityRating
             onClick={() => handleSelect(item.value)}
             disabled={disabled}
             fullWidth
-            variant={selectedValue === item.value ? 'primary' : 'ghost'}
+            variant={selectedValue === item.value ? "primary" : "ghost"}
             className={`
               justify-start h-12 px-4
-              ${selectedValue === item.value ? item.color : ''}
+              ${selectedValue === item.value ? item.color : ""}
             `}
           >
             <div className="flex items-center gap-3">
@@ -103,7 +141,7 @@ const QualityRating = ({ onRate, disabled = false, initialValue }: QualityRating
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default QualityRating;
+export default QualityRating

@@ -1,26 +1,26 @@
-import { useEffect, useRef, useState } from 'react';
-import type { Interview } from '~/types/interview';
-import Card from '../common/Card';
-import CardFront from './CardFront';
-import CardBack from './CardBack';
-import QualityRating from '../study/QualityRating';
+import { useEffect, useRef, useState } from "react"
+import type { Interview } from "~/types/interview"
+import Card from "../common/Card"
+import QualityRating from "../study/QualityRating"
+import CardBack from "./CardBack"
+import CardFront from "./CardFront"
 
 export interface FlashCardProps {
-  interview: Interview;
-  isFlipped: boolean;
-  onFlip: () => void;
-  onNext: () => void;
-  onPrevious: () => void;
-  onRate: (quality: number) => void;
-  showHint: boolean;
-  onToggleHint: () => void;
-  hints: string[];
-  currentHintIndex: number;
-  onHideHint: () => void;
-  canGoNext?: boolean;
-  canGoPrevious?: boolean;
-  isLastCard?: boolean;
-  enableKeyboardShortcuts?: boolean;
+  interview: Interview
+  isFlipped: boolean
+  onFlip: () => void
+  onNext: () => void
+  onPrevious: () => void
+  onRate: (quality: number) => void
+  showHint: boolean
+  onToggleHint: () => void
+  hints: string[]
+  currentHintIndex: number
+  onHideHint: () => void
+  canGoNext?: boolean
+  canGoPrevious?: boolean
+  isLastCard?: boolean
+  enableKeyboardShortcuts?: boolean
 }
 
 const FlashCard = ({
@@ -38,14 +38,14 @@ const FlashCard = ({
   canGoNext = true,
   canGoPrevious = true,
   isLastCard = false,
-  enableKeyboardShortcuts = true
+  enableKeyboardShortcuts = true,
 }: FlashCardProps) => {
-  const [isAnimating, setIsAnimating] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
+  const [isAnimating, setIsAnimating] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
 
   // キーボードショートカット
   useEffect(() => {
-    if (!enableKeyboardShortcuts) return;
+    if (!enableKeyboardShortcuts) return
 
     const handleKeyPress = (event: KeyboardEvent) => {
       // 入力フィールドにフォーカスがある場合は無視
@@ -53,50 +53,50 @@ const FlashCard = ({
         event.target instanceof HTMLInputElement ||
         event.target instanceof HTMLTextAreaElement
       ) {
-        return;
+        return
       }
 
       switch (event.key) {
-        case ' ': // スペースキー
-          event.preventDefault();
-          onFlip();
-          break;
-        case 'ArrowLeft':
-          event.preventDefault();
-          if (canGoPrevious) onPrevious();
-          break;
-        case 'ArrowRight':
-          event.preventDefault();
-          if (canGoNext) onNext();
-          break;
-        case 'h':
-        case 'H':
-          event.preventDefault();
+        case " ": // スペースキー
+          event.preventDefault()
+          onFlip()
+          break
+        case "ArrowLeft":
+          event.preventDefault()
+          if (canGoPrevious) onPrevious()
+          break
+        case "ArrowRight":
+          event.preventDefault()
+          if (canGoNext) onNext()
+          break
+        case "h":
+        case "H":
+          event.preventDefault()
           if (showHint && currentHintIndex < hints.length - 1) {
             // 次のヒントに進む処理
-            onToggleHint();
+            onToggleHint()
           } else {
-            onToggleHint();
+            onToggleHint()
           }
-          break;
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
+          break
+        case "0":
+        case "1":
+        case "2":
+        case "3":
+        case "4":
+        case "5":
           if (isFlipped) {
-            event.preventDefault();
-            onRate(parseInt(event.key));
+            event.preventDefault()
+            onRate(Number.parseInt(event.key))
           }
-          break;
+          break
         default:
-          break;
+          break
       }
-    };
+    }
 
-    document.addEventListener('keydown', handleKeyPress);
-    return () => document.removeEventListener('keydown', handleKeyPress);
+    document.addEventListener("keydown", handleKeyPress)
+    return () => document.removeEventListener("keydown", handleKeyPress)
   }, [
     enableKeyboardShortcuts,
     isFlipped,
@@ -109,59 +109,63 @@ const FlashCard = ({
     onNext,
     onPrevious,
     onToggleHint,
-    onRate
-  ]);
+    onRate,
+  ])
 
   // フリップアニメーション
   const handleFlip = () => {
-    if (isAnimating) return;
-    
-    setIsAnimating(true);
+    if (isAnimating) return
+
+    setIsAnimating(true)
     setTimeout(() => {
-      onFlip();
-      setIsAnimating(false);
-    }, 300);
-  };
+      onFlip()
+      setIsAnimating(false)
+    }, 300)
+  }
 
   // スワイプジェスチャー対応（モバイル）
-  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
-  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null);
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(
+    null
+  )
+  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(
+    null
+  )
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
+    setTouchEnd(null)
     setTouchStart({
       x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY
-    });
-  };
+      y: e.targetTouches[0].clientY,
+    })
+  }
 
   const handleTouchMove = (e: React.TouchEvent) => {
     setTouchEnd({
       x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY
-    });
-  };
+      y: e.targetTouches[0].clientY,
+    })
+  }
 
   const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
+    if (!touchStart || !touchEnd) return
 
-    const distanceX = touchStart.x - touchEnd.x;
-    const distanceY = touchStart.y - touchEnd.y;
-    const isLeftSwipe = distanceX > 150;
-    const isRightSwipe = distanceX < -150;
-    const isVerticalSwipe = Math.abs(distanceY) > Math.abs(distanceX);
+    const distanceX = touchStart.x - touchEnd.x
+    const distanceY = touchStart.y - touchEnd.y
+    const isLeftSwipe = distanceX > 150
+    const isRightSwipe = distanceX < -150
+    const isVerticalSwipe = Math.abs(distanceY) > Math.abs(distanceX)
 
     // 縦スワイプは無視
-    if (isVerticalSwipe) return;
+    if (isVerticalSwipe) return
 
     if (isLeftSwipe && canGoNext) {
-      onNext();
+      onNext()
     } else if (isRightSwipe && canGoPrevious) {
-      onPrevious();
+      onPrevious()
     }
-  };
+  }
 
-  const currentHint = hints[currentHintIndex];
+  const currentHint = hints[currentHintIndex]
 
   return (
     <div
@@ -174,14 +178,16 @@ const FlashCard = ({
       <Card
         className={`
           h-full transition-all duration-300 transform-style-preserve-3d cursor-pointer
-          ${isAnimating ? 'animate-pulse' : ''}
-          ${isFlipped ? 'rotate-y-180' : ''}
+          ${isAnimating ? "animate-pulse" : ""}
+          ${isFlipped ? "rotate-y-180" : ""}
         `}
         padding="lg"
         variant="elevated"
         onClick={!isFlipped ? handleFlip : undefined}
       >
-        <div className={`absolute inset-0 backface-hidden ${isFlipped ? 'hidden' : 'block'}`}>
+        <div
+          className={`absolute inset-0 backface-hidden ${isFlipped ? "hidden" : "block"}`}
+        >
           <div className="h-full p-6">
             <CardFront
               interview={interview}
@@ -196,7 +202,9 @@ const FlashCard = ({
           </div>
         </div>
 
-        <div className={`absolute inset-0 backface-hidden ${isFlipped ? 'block' : 'hidden'}`}>
+        <div
+          className={`absolute inset-0 backface-hidden ${isFlipped ? "block" : "hidden"}`}
+        >
           <div className="h-full p-6 flex flex-col">
             <div className="flex-1 mb-6 overflow-hidden">
               <CardBack
@@ -206,10 +214,7 @@ const FlashCard = ({
             </div>
 
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-              <QualityRating
-                onRate={onRate}
-                disabled={false}
-              />
+              <QualityRating onRate={onRate} disabled={false} />
             </div>
           </div>
         </div>
@@ -227,7 +232,7 @@ const FlashCard = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default FlashCard;
+export default FlashCard
