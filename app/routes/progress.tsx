@@ -214,6 +214,7 @@ export default function Progress() {
                     { value: "all", label: "全期間" },
                   ].map(({ value, label }) => (
                     <button
+                      type="button"
                       key={value}
                       onClick={() =>
                         setFilters((prev) => ({
@@ -241,6 +242,7 @@ export default function Progress() {
                 <div className="flex flex-wrap gap-2">
                   {allCategories.map((category) => (
                     <button
+                      type="button"
                       key={category}
                       onClick={() => toggleCategory(category)}
                       className={`px-3 py-1 rounded text-sm transition-colors ${
@@ -257,12 +259,13 @@ export default function Progress() {
 
               {/* 難易度フィルター */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-text">
+                <span className="block text-sm font-medium text-text">
                   難易度
-                </label>
+                </span>
                 <div className="flex space-x-2">
                   {allDifficulties.map((difficulty) => (
                     <button
+                      type="button"
                       key={difficulty}
                       onClick={() => toggleDifficulty(difficulty)}
                       className={`px-3 py-1 rounded text-sm transition-colors ${

@@ -34,7 +34,7 @@ export class LocalStorageManager {
 
       // Dateオブジェクトの復元
       if (typeof parsed === "object" && parsed !== null) {
-        return this.reviveDates(parsed)
+        return LocalStorageManager.reviveDates(parsed)
       }
 
       return parsed
@@ -44,15 +44,15 @@ export class LocalStorageManager {
     }
   }
 
-  private static reviveDates(obj: any): any {
+  private static reviveDates<T>(obj: T): T {
     if (obj === null || typeof obj !== "object") return obj
 
     if (Array.isArray(obj)) {
-      return obj.map((item) => this.reviveDates(item))
+      return obj.map((item) => LocalStorageManager.reviveDates(item)) as T
     }
 
-    const result: any = {}
-    for (const [key, value] of Object.entries(obj)) {
+    const result: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
       // Date文字列の検出と変換
       if (
         typeof value === "string" &&
@@ -60,13 +60,13 @@ export class LocalStorageManager {
       ) {
         result[key] = new Date(value)
       } else if (typeof value === "object" && value !== null) {
-        result[key] = this.reviveDates(value)
+        result[key] = LocalStorageManager.reviveDates(value)
       } else {
         result[key] = value
       }
     }
 
-    return result
+    return result as T
   }
 
   private static setItem<T>(key: string, value: T): void {
@@ -81,7 +81,7 @@ export class LocalStorageManager {
   private static getItem<T>(key: string, defaultValue: T): T {
     try {
       const value = localStorage.getItem(key)
-      return this.parseJson(value, defaultValue)
+      return LocalStorageManager.parseJson(value, defaultValue)
     } catch (error) {
       console.error("Failed to read from localStorage:", error)
       return defaultValue
@@ -90,34 +90,34 @@ export class LocalStorageManager {
 
   // ユーザー設定の管理
   static getSettings(): UserSettings {
-    return this.getItem(STORAGE_KEYS.SETTINGS, DEFAULT_SETTINGS)
+    return LocalStorageManager.getItem(STORAGE_KEYS.SETTINGS, DEFAULT_SETTINGS)
   }
 
   static setSettings(settings: UserSettings): void {
-    this.setItem(STORAGE_KEYS.SETTINGS, settings)
+    LocalStorageManager.setItem(STORAGE_KEYS.SETTINGS, settings)
   }
 
   static updateSettings(updates: Partial<UserSettings>): UserSettings {
-    const current = this.getSettings()
+    const current = LocalStorageManager.getSettings()
     const updated = { ...current, ...updates }
-    this.setSettings(updated)
+    LocalStorageManager.setSettings(updated)
     return updated
   }
 
   // 学習進捗の管理
   static getProgress(): Record<string, UserProgress> {
-    return this.getItem(STORAGE_KEYS.PROGRESS, {})
+    return LocalStorageManager.getItem(STORAGE_KEYS.PROGRESS, {})
   }
 
   static setProgress(progress: Record<string, UserProgress>): void {
-    this.setItem(STORAGE_KEYS.PROGRESS, progress)
+    LocalStorageManager.setItem(STORAGE_KEYS.PROGRESS, progress)
   }
 
   static updateProgress(
     interviewId: string,
     update: Partial<UserProgress>
   ): UserProgress {
-    const allProgress = this.getProgress()
+    const allProgress = LocalStorageManager.getProgress()
     const current = allProgress[interviewId]
 
     const updated: UserProgress = {
@@ -134,46 +134,46 @@ export class LocalStorageManager {
     }
 
     allProgress[interviewId] = updated
-    this.setProgress(allProgress)
+    LocalStorageManager.setProgress(allProgress)
     return updated
   }
 
   static getProgressForInterview(interviewId: string): UserProgress | null {
-    const allProgress = this.getProgress()
+    const allProgress = LocalStorageManager.getProgress()
     return allProgress[interviewId] || null
   }
 
   // 学習セッションの管理
   static getSessions(): StudySession[] {
-    return this.getItem(STORAGE_KEYS.SESSIONS, [])
+    return LocalStorageManager.getItem(STORAGE_KEYS.SESSIONS, [])
   }
 
   static setSessions(sessions: StudySession[]): void {
-    this.setItem(STORAGE_KEYS.SESSIONS, sessions)
+    LocalStorageManager.setItem(STORAGE_KEYS.SESSIONS, sessions)
   }
 
   static addSession(session: StudySession): void {
-    const sessions = this.getSessions()
+    const sessions = LocalStorageManager.getSessions()
     sessions.push(session)
-    this.setSessions(sessions)
+    LocalStorageManager.setSessions(sessions)
   }
 
   static updateSession(
     sessionId: string,
     updates: Partial<StudySession>
   ): StudySession | null {
-    const sessions = this.getSessions()
+    const sessions = LocalStorageManager.getSessions()
     const index = sessions.findIndex((s) => s.id === sessionId)
 
     if (index === -1) return null
 
     sessions[index] = { ...sessions[index], ...updates }
-    this.setSessions(sessions)
+    LocalStorageManager.setSessions(sessions)
     return sessions[index]
   }
 
   static getSession(sessionId: string): StudySession | null {
-    const sessions = this.getSessions()
+    const sessions = LocalStorageManager.getSessions()
     return sessions.find((s) => s.id === sessionId) || null
   }
 
@@ -190,11 +190,11 @@ export class LocalStorageManager {
       categoryProgress: [],
     }
 
-    return this.getItem(STORAGE_KEYS.STATS, defaultStats)
+    return LocalStorageManager.getItem(STORAGE_KEYS.STATS, defaultStats)
   }
 
   static setStats(stats: StudyStats): void {
-    this.setItem(STORAGE_KEYS.STATS, stats)
+    LocalStorageManager.setItem(STORAGE_KEYS.STATS, stats)
   }
 
   // データ管理
@@ -255,9 +255,9 @@ export class LocalStorageManager {
   }
 
   static clearAllData(): void {
-    Object.values(STORAGE_KEYS).forEach((key) => {
+    for (const key of Object.values(STORAGE_KEYS)) {
       localStorage.removeItem(key)
-    })
+    }
   }
 
   static clearProgress(): void {

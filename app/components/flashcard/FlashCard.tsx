@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, memo } from "react"
 import type { Interview } from "~/types/interview"
 import Card from "../common/Card"
 import QualityRating from "../study/QualityRating"
@@ -23,7 +23,7 @@ export interface FlashCardProps {
   enableKeyboardShortcuts?: boolean
 }
 
-const FlashCard = ({
+const FlashCard = memo(({
   interview,
   isFlipped,
   onFlip,
@@ -233,6 +233,8 @@ const FlashCard = ({
       )}
     </div>
   )
-}
+})
+
+FlashCard.displayName = "FlashCard"
 
 export default FlashCard

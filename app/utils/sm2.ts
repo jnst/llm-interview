@@ -230,8 +230,8 @@ export class SM2Algorithm {
    * @param progress ユーザー進捗
    * @returns 新規カードかどうか
    */
-  public static isNew(progress: UserProgress | null): boolean {
-    return progress === null || (progress.reviewCount ?? 0) === 0
+  public static isNew(progress: UserProgress | null | undefined): boolean {
+    return !progress || progress.reviewCount === 0
   }
 }
 

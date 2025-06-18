@@ -39,6 +39,7 @@ export default function Index() {
   const { interviews } = useLoaderData<typeof loader>()
   const [stats, setStats] = useState<StudyStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [theme, setTheme] = useState<"light" | "dark">("light")
 
   // クライアントサイドでのみ統計を計算
   useEffect(() => {
@@ -66,6 +67,14 @@ export default function Index() {
 
     // コンポーネントマウント後に計算
     calculateStats()
+    
+    // テーマを読み込み
+    const savedTheme = LocalStorageManager.getSettings().theme
+    setTheme(savedTheme)
+    document.documentElement.classList.toggle(
+      "dark",
+      savedTheme === "dark"
+    )
   }, [interviews])
 
   if (isLoading) {
@@ -97,8 +106,8 @@ export default function Index() {
               <button
                 type="button"
                 onClick={() => {
-                  const theme = LocalStorageManager.getSettings().theme
                   const newTheme = theme === "light" ? "dark" : "light"
+                  setTheme(newTheme)
                   LocalStorageManager.updateSettings({ theme: newTheme })
                   document.documentElement.classList.toggle(
                     "dark",
@@ -108,9 +117,7 @@ export default function Index() {
                 className="p-2 text-text hover:bg-surface rounded-lg transition-colors"
                 title="テーマを切り替え"
               >
-                {LocalStorageManager.getSettings().theme === "light"
-                  ? "🌙"
-                  : "☀️"}
+                {theme === "light" ? "🌙" : "☀️"}
               </button>
             </div>
           </div>

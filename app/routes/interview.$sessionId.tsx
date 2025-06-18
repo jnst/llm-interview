@@ -9,8 +9,10 @@ import {
   useLoaderData,
   useNavigate,
   useParams,
+  useFetcher,
+  useRouteError,
 } from "@remix-run/react"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState, useRef } from "react"
 import Button from "~/components/common/Button"
 import Card from "~/components/common/Card"
 import Modal from "~/components/common/Modal"
@@ -110,6 +112,9 @@ export default function SessionStudy() {
   const [hintsUsed, setHintsUsed] = useState(0)
   const [showExitModal, setShowExitModal] = useState(false)
   const [hints, setHints] = useState<string[]>([])
+  const [formData, setFormData] = useState<Record<string, string> | null>(null)
+  const formRef = useRef<HTMLFormElement>(null)
+  const fetcher = useFetcher()
 
   // セッションの初期化
   useEffect(() => {
@@ -232,30 +237,14 @@ export default function SessionStudy() {
         (new Date().getTime() - cardStartTime.getTime()) / 1000
       )
 
-      // フォームデータを準備
-      const formData = new FormData()
-      formData.append("_action", "submit_answer")
-      formData.append("interviewId", currentInterview.id)
-      formData.append("quality", quality.toString())
-      formData.append("responseTime", responseTime.toString())
-      formData.append("hintsShown", hintsUsed.toString())
-
-      // フォームを送信
-      const form = document.createElement("form")
-      form.method = "POST"
-      form.style.display = "none"
-
-      for (const [key, value] of formData.entries()) {
-        const input = document.createElement("input")
-        input.type = "hidden"
-        input.name = key
-        input.value = value as string
-        form.appendChild(input)
-      }
-
-      document.body.appendChild(form)
-      form.submit()
-      document.body.removeChild(form)
+      // フォームに値を設定
+      setFormData({
+        action: "submit_answer",
+        interviewId: currentInterview.id,
+        quality: quality.toString(),
+        responseTime: responseTime.toString(),
+        hintsShown: hintsUsed.toString(),
+      })
 
       // 次のカードに進む
       if (!isLastCard) {
@@ -292,12 +281,27 @@ export default function SessionStudy() {
     setShowExitModal(true)
   }
 
+  // フォームデータが設定されたら送信
+  useEffect(() => {
+    if (formData && fetcher.state === "idle") {
+      const submitFormData = new FormData()
+      submitFormData.append("_action", formData.action)
+      if (formData.interviewId) submitFormData.append("interviewId", formData.interviewId)
+      if (formData.quality) submitFormData.append("quality", formData.quality)
+      if (formData.responseTime) submitFormData.append("responseTime", formData.responseTime)
+      if (formData.hintsShown) submitFormData.append("hintsShown", formData.hintsShown)
+      
+      fetcher.submit(submitFormData, { method: "POST" })
+      setFormData(null)
+    }
+  }, [formData, fetcher])
+
   if (!session || !currentInterview) {
     return (
       <div className="min-h-screen bg-background text-text">
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
             <span className="ml-2 text-text">読み込み中...</span>
           </div>
         </div>
@@ -313,6 +317,7 @@ export default function SessionStudy() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
+                type="button"
                 onClick={handleExit}
                 className="text-text hover:text-primary"
               >
@@ -325,6 +330,7 @@ export default function SessionStudy() {
             <div className="flex items-center space-x-4">
               <Timer startTime={sessionStartTime} />
               <button
+                type="button"
                 onClick={handleExit}
                 className="text-text hover:text-error"
               >
@@ -415,6 +421,46 @@ export default function SessionStudy() {
           </div>
         </Modal>
       )}
+    </div>
+  )
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError()
+  const navigate = useNavigate()
+
+  return (
+    <div className="min-h-screen bg-background text-text">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
+          <Card>
+            <div className="text-center space-y-4">
+              <h2 className="text-2xl font-bold text-error">
+                エラーが発生しました
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400">
+                {error instanceof Error
+                  ? error.message
+                  : "予期しないエラーが発生しました"}
+              </p>
+              <div className="flex space-x-4 justify-center">
+                <Button
+                  onClick={() => window.location.reload()}
+                  variant="primary"
+                >
+                  再読み込み
+                </Button>
+                <Button
+                  onClick={() => navigate("/")}
+                  variant="ghost"
+                >
+                  ホームに戻る
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
     </div>
   )
 }

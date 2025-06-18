@@ -162,7 +162,7 @@ export default function Settings() {
         alert("データをインポートしました")
       }
     } catch (error) {
-      alert("データのインポートに失敗しました: " + (error as Error).message)
+      alert(`データのインポートに失敗しました: ${(error as Error).message}`)
     } finally {
       setIsLoading(false)
       setImportFile(null)
