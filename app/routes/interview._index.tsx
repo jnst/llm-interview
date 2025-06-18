@@ -1,10 +1,8 @@
 import {
-  type ActionFunctionArgs,
   type LoaderFunctionArgs,
   json,
-  redirect,
 } from "@remix-run/node"
-import { Form, Link, useActionData, useLoaderData } from "@remix-run/react"
+import { Form, Link, useLoaderData, useNavigate } from "@remix-run/react"
 import { useEffect, useState } from "react"
 import Button from "~/components/common/Button"
 import Card from "~/components/common/Card"
@@ -26,68 +24,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
 }
 
-export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData()
-  const action = formData.get("_action")
-
-  if (action === "start_quick_session") {
-    // クイック学習セッション（デフォルト設定）
-    const interviews: Interview[] = await import("~/data/interview.json").then(
-      (module) => (module.default || module) as Interview[]
-    )
-
-    const config: SessionStartConfig = {
-      maxCards: 20,
-      includeNew: true,
-      includeReview: true,
-      categories: [],
-      difficulties: [],
-    }
-
-    try {
-      const session = defaultStudyManager.startStudySession(interviews, config)
-      return redirect(`/interview/${session.id}`)
-    } catch (error) {
-      return json({ error: "セッションの開始に失敗しました" }, { status: 400 })
-    }
-  }
-
-  if (action === "start_session") {
-    // セッション設定を取得
-    const maxCards = Number.parseInt(formData.get("maxCards") as string) || 20
-    const includeNew = formData.get("includeNew") === "on"
-    const includeReview = formData.get("includeReview") === "on"
-    const categories = formData.getAll("categories") as Category[]
-    const difficulties = formData.getAll("difficulties") as Difficulty[]
-
-    // 質問データを読み込み
-    const interviews: Interview[] = await import("~/data/interview.json").then(
-      (module) => (module.default || module) as Interview[]
-    )
-
-    const config: SessionStartConfig = {
-      maxCards,
-      includeNew,
-      includeReview,
-      categories,
-      difficulties,
-    }
-
-    try {
-      // セッションを開始
-      const session = defaultStudyManager.startStudySession(interviews, config)
-      return redirect(`/interview/${session.id}`)
-    } catch (error) {
-      return json({ error: "セッションの開始に失敗しました" }, { status: 400 })
-    }
-  }
-
-  return json({ error: "無効なアクションです" }, { status: 400 })
-}
 
 export default function InterviewIndex() {
   const { interviews } = useLoaderData<typeof loader>()
-  const actionData = useActionData<typeof action>()
+  const navigate = useNavigate()
   const [config, setConfig] = useState<SessionStartConfig>({
     maxCards: 20,
     includeNew: true,
@@ -96,6 +36,8 @@ export default function InterviewIndex() {
     difficulties: [],
   })
   const [availableCards, setAvailableCards] = useState(0)
+  const [isStarting, setIsStarting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // 利用可能なカード数を計算
   useEffect(() => {
@@ -135,6 +77,37 @@ export default function InterviewIndex() {
     handleConfigChange({ difficulties: newDifficulties })
   }
 
+  const handleStartSession = (sessionConfig: SessionStartConfig) => {
+    if (isStarting) return
+    
+    setIsStarting(true)
+    setError(null)
+    
+    try {
+      const session = defaultStudyManager.startStudySession(interviews, sessionConfig)
+      navigate(`/interview/${session.id}`)
+    } catch (error) {
+      console.error('Failed to start session:', error)
+      setError('セッションの開始に失敗しました')
+      setIsStarting(false)
+    }
+  }
+  
+  const handleQuickStart = () => {
+    const quickConfig: SessionStartConfig = {
+      maxCards: 20,
+      includeNew: true,
+      includeReview: true,
+      categories: [],
+      difficulties: [],
+    }
+    handleStartSession(quickConfig)
+  }
+  
+  const handleCustomStart = () => {
+    handleStartSession(config)
+  }
+
   const getDifficultyEmoji = (difficulty: Difficulty) => {
     switch (difficulty) {
       case "初級":
@@ -165,14 +138,13 @@ export default function InterviewIndex() {
       {/* メインコンテンツ */}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto space-y-6">
-          {actionData?.error && (
+          {error && (
             <Card className="border-error">
-              <div className="text-error text-center">{actionData.error}</div>
+              <div className="text-error text-center">{error}</div>
             </Card>
           )}
 
-          <Form method="post">
-            <input type="hidden" name="_action" value="start_session" />
+          <div>
 
             {/* カード数設定 */}
             <Card>
@@ -190,7 +162,6 @@ export default function InterviewIndex() {
                   <input
                     id="maxCards"
                     type="range"
-                    name="maxCards"
                     min="5"
                     max="50"
                     step="5"
@@ -221,7 +192,6 @@ export default function InterviewIndex() {
                   <label className="flex items-center space-x-3">
                     <input
                       type="checkbox"
-                      name="includeNew"
                       checked={config.includeNew}
                       onChange={(e) =>
                         handleConfigChange({ includeNew: e.target.checked })
@@ -236,7 +206,6 @@ export default function InterviewIndex() {
                   <label className="flex items-center space-x-3">
                     <input
                       type="checkbox"
-                      name="includeReview"
                       checked={config.includeReview}
                       onChange={(e) =>
                         handleConfigChange({ includeReview: e.target.checked })
@@ -271,8 +240,6 @@ export default function InterviewIndex() {
                       >
                         <input
                           type="checkbox"
-                          name="categories"
-                          value={category}
                           checked={config.categories.includes(category)}
                           onChange={() => toggleCategory(category)}
                           className="rounded border-gray-300 text-primary focus:ring-primary"
@@ -307,8 +274,6 @@ export default function InterviewIndex() {
                       >
                         <input
                           type="checkbox"
-                          name="difficulties"
-                          value={difficulty}
                           checked={config.difficulties.includes(difficulty)}
                           onChange={() => toggleDifficulty(difficulty)}
                           className="rounded border-gray-300 text-primary focus:ring-primary"
@@ -344,37 +309,36 @@ export default function InterviewIndex() {
             {/* 開始ボタン */}
             <div className="space-y-4">
               <Button
-                type="submit"
+                onClick={handleCustomStart}
                 size="lg"
                 fullWidth
                 disabled={
+                  isStarting ||
                   availableCards === 0 ||
                   (!config.includeNew && !config.includeReview)
                 }
                 className="text-lg font-semibold py-4"
               >
-                学習を開始する
+                {isStarting ? '開始中...' : '学習を開始する'}
               </Button>
               <div className="text-center text-sm text-gray-600 dark:text-gray-400">
                 または
               </div>
-              <Form method="post" action="/interview">
-                <input
-                  type="hidden"
-                  name="_action"
-                  value="start_quick_session"
-                />
-                <Button type="submit" variant="ghost" fullWidth>
-                  デフォルト設定で開始
-                </Button>
-              </Form>
+              <Button 
+                onClick={handleQuickStart}
+                variant="ghost" 
+                fullWidth
+                disabled={isStarting}
+              >
+                {isStarting ? '開始中...' : 'デフォルト設定で開始'}
+              </Button>
               <Link to="/">
                 <Button variant="ghost" fullWidth>
                   ホームに戻る
                 </Button>
               </Link>
             </div>
-          </Form>
+          </div>
         </div>
       </main>
     </div>
