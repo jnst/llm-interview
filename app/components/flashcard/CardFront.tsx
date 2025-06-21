@@ -85,11 +85,25 @@ const CardFront = ({
 
           <div className="flex gap-2 justify-center">
             {currentHintIndex < totalHints - 1 && (
-              <Button variant="ghost" size="sm" onClick={onToggleHint}>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleHint();
+                }}
+              >
                 次のヒント
               </Button>
             )}
-            <Button variant="ghost" size="sm" onClick={onHideHint}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={(e) => {
+                e.stopPropagation();
+                onHideHint();
+              }}
+            >
               ヒントを隠す
             </Button>
           </div>
@@ -102,7 +116,10 @@ const CardFront = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={onToggleHint}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleHint();
+            }}
             icon={
               <svg
                 className="w-4 h-4"
@@ -128,7 +145,10 @@ const CardFront = ({
         <Button
           variant="primary"
           size="lg"
-          onClick={onFlip}
+          onClick={(e) => {
+            e.stopPropagation();
+            onFlip();
+          }}
           className="min-h-[44px]"
         >
           タップして回答を見る

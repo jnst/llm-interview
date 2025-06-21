@@ -175,50 +175,58 @@ const FlashCard = memo(({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <Card
-        className={`
-          h-full transition-all duration-300 transform-style-preserve-3d cursor-pointer
-          ${isAnimating ? "animate-pulse" : ""}
-          ${isFlipped ? "rotate-y-180" : ""}
-        `}
-        padding="lg"
-        variant="elevated"
-        onClick={!isFlipped ? handleFlip : undefined}
-      >
-        <div
-          className={`absolute inset-0 backface-hidden ${isFlipped ? "hidden" : "block"}`}
-        >
-          <div className="h-full p-6">
-            <CardFront
-              interview={interview}
-              showHint={showHint}
-              currentHint={currentHint}
-              totalHints={hints.length}
-              currentHintIndex={currentHintIndex}
-              onToggleHint={onToggleHint}
-              onHideHint={onHideHint}
-              onFlip={handleFlip}
-            />
-          </div>
-        </div>
-
-        <div
-          className={`absolute inset-0 backface-hidden ${isFlipped ? "block" : "hidden"}`}
-        >
-          <div className="h-full p-6 flex flex-col">
-            <div className="flex-1 mb-6 overflow-hidden">
-              <CardBack
+      <div className="relative h-full">
+        {/* カード表面 */}
+        {!isFlipped && (
+          <Card
+            className={`
+              h-full transition-all duration-300 cursor-pointer
+              ${isAnimating ? "animate-pulse" : ""}
+            `}
+            padding="lg"
+            variant="elevated"
+            onClick={handleFlip}
+          >
+            <div className="h-full p-6">
+              <CardFront
                 interview={interview}
-                hintsUsed={currentHintIndex + 1}
+                showHint={showHint}
+                currentHint={currentHint}
+                totalHints={hints.length}
+                currentHintIndex={currentHintIndex}
+                onToggleHint={onToggleHint}
+                onHideHint={onHideHint}
+                onFlip={handleFlip}
               />
             </div>
+          </Card>
+        )}
 
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-              <QualityRating onRate={onRate} disabled={false} />
+        {/* カード裏面 */}
+        {isFlipped && (
+          <Card
+            className={`
+              h-full transition-all duration-300
+              ${isAnimating ? "animate-pulse" : ""}
+            `}
+            padding="lg"
+            variant="elevated"
+          >
+            <div className="h-full p-6 flex flex-col">
+              <div className="flex-1 mb-6 overflow-hidden">
+                <CardBack
+                  interview={interview}
+                  hintsUsed={Math.max(1, currentHintIndex + (showHint ? 1 : 0))}
+                />
+              </div>
+
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <QualityRating onRate={onRate} disabled={false} />
+              </div>
             </div>
-          </div>
-        </div>
-      </Card>
+          </Card>
+        )}
+      </div>
 
       {/* キーボードショートカットのヘルプ（デスクトップ） */}
       {enableKeyboardShortcuts && (
