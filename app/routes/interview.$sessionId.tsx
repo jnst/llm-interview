@@ -1,15 +1,10 @@
 import {
-  type ActionFunctionArgs,
   type LoaderFunctionArgs,
   json,
 } from "@remix-run/node"
 import {
-  Form,
-  useActionData,
   useLoaderData,
   useNavigate,
-  useParams,
-  useFetcher,
   useRouteError,
 } from "@remix-run/react"
 import { useCallback, useEffect, useState, useRef } from "react"
@@ -48,57 +43,9 @@ export async function loader({ params }: LoaderFunctionArgs) {
   }
 }
 
-export async function action({ request, params }: ActionFunctionArgs) {
-  const { sessionId } = params
-  const formData = await request.formData()
-  const action = formData.get("_action")
-
-  if (!sessionId) {
-    return json({ error: "セッションIDが見つかりません" }, { status: 404 })
-  }
-
-  if (action === "submit_answer") {
-    const interviewId = formData.get("interviewId") as string
-    const quality = Number.parseInt(formData.get("quality") as string)
-    const responseTime = Number.parseInt(formData.get("responseTime") as string)
-    const hintsShown = Number.parseInt(formData.get("hintsShown") as string)
-
-    try {
-      const reviewedInterview: ReviewedInterview = {
-        interviewId,
-        isCorrect: quality >= 3, // 品質3以上を正解とする
-        reviewedAt: new Date(),
-        responseTime,
-        quality,
-        hintsShown,
-      }
-
-      const updatedSession = defaultStudyManager.addReviewToSession(
-        sessionId,
-        reviewedInterview
-      )
-
-      return json({ success: true, session: updatedSession })
-    } catch (error) {
-      return json({ error: "回答の記録に失敗しました" }, { status: 400 })
-    }
-  }
-
-  if (action === "end_session") {
-    try {
-      const endedSession = defaultStudyManager.endSession(sessionId)
-      return json({ success: true, session: endedSession, ended: true })
-    } catch (error) {
-      return json({ error: "セッションの終了に失敗しました" }, { status: 400 })
-    }
-  }
-
-  return json({ error: "無効なアクションです" }, { status: 400 })
-}
 
 export default function SessionStudy() {
   const { interviews, sessionId } = useLoaderData<typeof loader>()
-  const actionData = useActionData<typeof action>()
   const navigate = useNavigate()
 
   const [session, setSession] = useState<StudySession | null>(null)
@@ -112,9 +59,7 @@ export default function SessionStudy() {
   const [hintsUsed, setHintsUsed] = useState(0)
   const [showExitModal, setShowExitModal] = useState(false)
   const [hints, setHints] = useState<string[]>([])
-  const [formData, setFormData] = useState<Record<string, string> | null>(null)
-  const formRef = useRef<HTMLFormElement>(null)
-  const fetcher = useFetcher()
+  const [error, setError] = useState<string | null>(null)
 
   // セッションの初期化
   useEffect(() => {
@@ -159,32 +104,6 @@ export default function SessionStudy() {
     }
   }, [currentInterviews, currentIndex])
 
-  // ActionDataの処理
-  useEffect(() => {
-    if (
-      actionData &&
-      "success" in actionData &&
-      actionData.success &&
-      "session" in actionData &&
-      actionData.session
-    ) {
-      // Dateオブジェクトを復元
-      const sessionWithDates = {
-        ...actionData.session,
-        startedAt: new Date(actionData.session.startedAt),
-        endedAt: actionData.session.endedAt ? new Date(actionData.session.endedAt) : undefined,
-        reviewedInterviews: actionData.session.reviewedInterviews.map(review => ({
-          ...review,
-          reviewedAt: new Date(review.reviewedAt)
-        }))
-      }
-      setSession(sessionWithDates)
-      if ("ended" in actionData && actionData.ended) {
-        // セッション終了時の処理
-        navigate("/", { replace: true })
-      }
-    }
-  }, [actionData, navigate])
 
   const currentInterview = currentInterviews[currentIndex]
   const isLastCard = currentIndex >= currentInterviews.length - 1
@@ -231,70 +150,64 @@ export default function SessionStudy() {
 
   const handleQualityRate = useCallback(
     (quality: number) => {
-      if (!currentInterview) return
+      if (!currentInterview || !session) return
 
-      const responseTime = Math.floor(
-        (new Date().getTime() - cardStartTime.getTime()) / 1000
-      )
+      try {
+        const responseTime = Math.floor(
+          (new Date().getTime() - cardStartTime.getTime()) / 1000
+        )
 
-      // フォームに値を設定
-      setFormData({
-        action: "submit_answer",
-        interviewId: currentInterview.id,
-        quality: quality.toString(),
-        responseTime: responseTime.toString(),
-        hintsShown: hintsUsed.toString(),
-      })
+        const reviewedInterview: ReviewedInterview = {
+          interviewId: currentInterview.id,
+          isCorrect: quality >= 3, // 品質3以上を正解とする
+          reviewedAt: new Date(),
+          responseTime,
+          quality,
+          hintsShown: hintsUsed,
+        }
 
-      // 次のカードに進む
-      if (!isLastCard) {
-        setTimeout(() => {
-          handleNext()
-        }, 500)
+        // クライアントサイドで学習記録を更新
+        const updatedSession = defaultStudyManager.addReviewToSession(
+          sessionId,
+          reviewedInterview
+        )
+
+        if (updatedSession) {
+          setSession(updatedSession)
+        }
+
+        // 次のカードに進む
+        if (!isLastCard) {
+          setTimeout(() => {
+            handleNext()
+          }, 500)
+        }
+      } catch (error) {
+        console.error('Failed to record answer:', error)
+        setError('回答の記録に失敗しました')
       }
     },
-    [currentInterview, cardStartTime, hintsUsed, isLastCard, handleNext]
+    [currentInterview, session, sessionId, cardStartTime, hintsUsed, isLastCard, handleNext]
   )
 
   const handleEndSession = () => {
-    const formData = new FormData()
-    formData.append("_action", "end_session")
-
-    const form = document.createElement("form")
-    form.method = "POST"
-    form.style.display = "none"
-
-    for (const [key, value] of formData.entries()) {
-      const input = document.createElement("input")
-      input.type = "hidden"
-      input.name = key
-      input.value = value as string
-      form.appendChild(input)
+    try {
+      const endedSession = defaultStudyManager.endSession(sessionId)
+      if (endedSession) {
+        setSession(endedSession)
+      }
+      // セッション終了後はホームに戻る
+      navigate("/", { replace: true })
+    } catch (error) {
+      console.error('Failed to end session:', error)
+      setError('セッションの終了に失敗しました')
     }
-
-    document.body.appendChild(form)
-    form.submit()
-    document.body.removeChild(form)
   }
 
   const handleExit = () => {
     setShowExitModal(true)
   }
 
-  // フォームデータが設定されたら送信
-  useEffect(() => {
-    if (formData && fetcher.state === "idle") {
-      const submitFormData = new FormData()
-      submitFormData.append("_action", formData.action)
-      if (formData.interviewId) submitFormData.append("interviewId", formData.interviewId)
-      if (formData.quality) submitFormData.append("quality", formData.quality)
-      if (formData.responseTime) submitFormData.append("responseTime", formData.responseTime)
-      if (formData.hintsShown) submitFormData.append("hintsShown", formData.hintsShown)
-      
-      fetcher.submit(submitFormData, { method: "POST" })
-      setFormData(null)
-    }
-  }, [formData, fetcher])
 
   if (!session || !currentInterview) {
     return (
@@ -355,9 +268,9 @@ export default function SessionStudy() {
       {/* メインコンテンツ */}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          {actionData && "error" in actionData && actionData.error && (
+          {error && (
             <Card className="mb-4 border-error">
-              <div className="text-error text-center">{actionData.error}</div>
+              <div className="text-error text-center">{error}</div>
             </Card>
           )}
 
