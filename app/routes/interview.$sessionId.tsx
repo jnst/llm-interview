@@ -19,7 +19,7 @@ import type {
   ReviewedInterview,
   StudySession,
 } from "~/types/interview"
-import { generateHints } from "~/utils/hints"
+import { defaultHintManager } from "~/utils/hints"
 import { LocalStorageManager } from "~/utils/localStorage"
 import { defaultStudyManager } from "~/utils/study"
 
@@ -63,6 +63,9 @@ export default function SessionStudy() {
 
   // セッションの初期化
   useEffect(() => {
+    // ヒントキャッシュをクリア（新しいセッション開始時）
+    defaultHintManager.clearCache()
+    
     const loadedSession = LocalStorageManager.getSession(sessionId)
     if (loadedSession) {
       setSession(loadedSession)
@@ -99,8 +102,13 @@ export default function SessionStudy() {
       currentIndex < currentInterviews.length
     ) {
       const currentInterview = currentInterviews[currentIndex]
-      const generatedHints = generateHints(currentInterview.answer)
+      const hintSet = defaultHintManager.generateHints(currentInterview.id, currentInterview.answer)
+      const generatedHints = hintSet.hints.map(hint => hint.content)
       setHints(generatedHints)
+      
+      // カードが変わったときにヒント状態をリセット
+      setShowHint(false)
+      setCurrentHintIndex(0)
     }
   }, [currentInterviews, currentIndex])
 

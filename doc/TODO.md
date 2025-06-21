@@ -1,6 +1,6 @@
 # TODO
 
-- [ ] 次の問題に進んだとき、ヒントを表示しても問題1のヒントが表示されてしまう問題を修正する
+- [x] 次の問題に進んだとき、ヒントを表示しても問題1のヒントが表示されてしまう問題を修正する
 - [x] 「どのくらい理解できました？」の評価ボタンを押すとエラーが発生する
 ```
 Failed to read from localStorage: ReferenceError: localStorage is not defined
