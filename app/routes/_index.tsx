@@ -3,7 +3,7 @@ import {
   type MetaFunction,
   json,
 } from "@remix-run/node"
-import { Form, Link, useLoaderData, useRouteError } from "@remix-run/react"
+import { Link, useLoaderData, useNavigate, useRouteError } from "@remix-run/react"
 import { useEffect, useState } from "react"
 import Button from "~/components/common/Button"
 import Card from "~/components/common/Card"
@@ -37,6 +37,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function Index() {
   const { interviews } = useLoaderData<typeof loader>()
+  const navigate = useNavigate()
   const [stats, setStats] = useState<StudyStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [theme, setTheme] = useState<"light" | "dark">("light")
@@ -186,17 +187,14 @@ export default function Index() {
 
           {/* 学習開始ボタン */}
           <div className="text-center">
-            <Form method="post" action="/interview">
-              <input type="hidden" name="_action" value="start_quick_session" />
-              <Button
-                type="submit"
-                size="lg"
-                fullWidth
-                className="text-lg font-semibold py-4"
-              >
-                学習を開始する
-              </Button>
-            </Form>
+            <Button
+              onClick={() => navigate("/interview")}
+              size="lg"
+              fullWidth
+              className="text-lg font-semibold py-4"
+            >
+              学習を開始する
+            </Button>
           </div>
 
           {/* カテゴリー別進捗 */}
