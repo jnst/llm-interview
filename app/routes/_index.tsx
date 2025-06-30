@@ -9,7 +9,7 @@ import Button from "~/components/common/Button"
 import Card from "~/components/common/Card"
 import type { Interview, StudyStats } from "~/types/interview"
 import { LocalStorageManager } from "~/utils/localStorage"
-import { defaultStudyManager } from "~/utils/study"
+import { defaultStudyManager, type SessionStartConfig } from "~/utils/study"
 
 export const meta: MetaFunction = () => {
   return [
@@ -41,6 +41,7 @@ export default function Index() {
   const [stats, setStats] = useState<StudyStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [theme, setTheme] = useState<"light" | "dark">("light")
+  const [isStarting, setIsStarting] = useState(false)
 
   // クライアントサイドでのみ統計を計算
   useEffect(() => {
@@ -77,6 +78,29 @@ export default function Index() {
       savedTheme === "dark"
     )
   }, [interviews])
+
+  // デフォルト設定で学習を開始する関数
+  const handleQuickStart = () => {
+    if (isStarting) return
+    
+    setIsStarting(true)
+    
+    try {
+      const defaultConfig: SessionStartConfig = {
+        maxCards: 20,
+        includeNew: true,
+        includeReview: true,
+        categories: [],
+        difficulties: [],
+      }
+      
+      const session = defaultStudyManager.startStudySession(interviews, defaultConfig)
+      navigate(`/interview/${session.id}`)
+    } catch (error) {
+      console.error('Failed to start session:', error)
+      setIsStarting(false)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -127,134 +151,73 @@ export default function Index() {
 
       {/* メインコンテンツ */}
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto space-y-8">
-          {/* 今日の学習統計 */}
-          <Card>
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold text-text">今日の学習</h2>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-warning">
-                    {stats?.dueToday || 0}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    復習
-                  </div>
+        <div className="max-w-md mx-auto">
+          {/* 中央のメインコンテンツ */}
+          <div className="text-center space-y-8">
+            {/* アプリ名とサブタイトル */}
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold text-text">LLM Interview</h2>
+              <p className="text-gray-600 dark:text-gray-400">
+                AI面接対策フラッシュカード
+              </p>
+            </div>
+
+            {/* 簡単な統計情報 */}
+            <div className="bg-surface rounded-lg p-6">
+              <div className="text-center">
+                <div className="text-4xl font-bold text-primary mb-2">
+                  {interviews?.length || 0}
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-primary">
-                    {stats?.newToday || 0}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    新規
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-success">
-                    {(stats?.dueToday || 0) + (stats?.newToday || 0)}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    合計
-                  </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  問題数
                 </div>
               </div>
             </div>
-          </Card>
 
-          {/* 学習状況 */}
-          <Card>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-text">連続学習:</span>
-                <span className="font-semibold text-warning">
-                  🔥 {stats?.streak || 0}日
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-text">正解率:</span>
-                <span className="font-semibold text-success">
-                  {Math.round(stats?.averageAccuracy || 0)}%
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-text">学習時間:</span>
-                <span className="font-semibold text-primary">
-                  {Math.round(stats?.totalStudyTime || 0)}分
-                </span>
-              </div>
-            </div>
-          </Card>
-
-          {/* 学習開始ボタン */}
-          <div className="text-center">
+            {/* 学習開始ボタン */}
             <Button
-              onClick={() => navigate("/interview")}
+              onClick={handleQuickStart}
               size="lg"
               fullWidth
-              className="text-lg font-semibold py-4"
+              disabled={isStarting}
+              className="text-xl font-semibold py-6 text-white bg-primary hover:bg-primary/90 disabled:opacity-50"
             >
-              学習を開始する
+              {isStarting ? "開始中..." : "学習を開始する"}
             </Button>
-          </div>
 
-          {/* カテゴリー別進捗 */}
-          {stats?.categoryProgress && stats.categoryProgress.length > 0 && (
-            <Card>
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-text">
-                  カテゴリー別進捗
-                </h3>
-                <div className="space-y-3">
-                  {stats.categoryProgress.map((progress) => (
-                    <div key={progress.category} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-text">
-                          {progress.category}
-                        </span>
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          {Math.round(
-                            (progress.masteredCards / progress.totalCards) * 100
-                          )}
-                          %
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div
-                          className="bg-primary h-2 rounded-full transition-all duration-300"
-                          style={{
-                            width: `${Math.round((progress.masteredCards / progress.totalCards) * 100)}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Card>
-          )}
-
-          {/* ナビゲーション */}
-          <div className="grid grid-cols-2 gap-4">
-            <Link to="/progress">
-              <Button
-                variant="ghost"
-                fullWidth
-                className="flex items-center justify-center space-x-2"
-              >
-                <span>📊</span>
-                <span>詳細な進捗</span>
-              </Button>
-            </Link>
-            <Link to="/settings">
-              <Button
-                variant="ghost"
-                fullWidth
-                className="flex items-center justify-center space-x-2"
-              >
-                <span>⚙️</span>
-                <span>設定</span>
-              </Button>
-            </Link>
+            {/* サブメニュー */}
+            <div className="flex justify-center space-x-4 pt-4">
+              <Link to="/interview">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center space-x-1 text-gray-600 dark:text-gray-400 hover:text-text"
+                >
+                  <span>⚙️</span>
+                  <span>詳細設定</span>
+                </Button>
+              </Link>
+              <Link to="/progress">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center space-x-1 text-gray-600 dark:text-gray-400 hover:text-text"
+                >
+                  <span>📊</span>
+                  <span>進捗</span>
+                </Button>
+              </Link>
+              <Link to="/settings">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center space-x-1 text-gray-600 dark:text-gray-400 hover:text-text"
+                >
+                  <span>⚙️</span>
+                  <span>設定</span>
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </main>
