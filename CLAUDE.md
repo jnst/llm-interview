@@ -11,13 +11,16 @@ This is an AI/LLM engineer interview preparation learning website built with Rem
 ### Data Structure
 The project follows a content-first architecture with two main data types:
 
-1. **Interview Questions** (`app/data/ja/Q*.yaml`): 50 structured interview questions with answers
-   - Format: `id`, `question`, `answer`
+1. **Interview Questions** (`app/data/interviews/Q*.md`): 50 structured interview questions with answers
+   - Format: front matter with `id`, `keywords` array, followed by question and answer sections
    - Japanese language content focused on AI/LLM concepts
+   - Automatically generated from YAML files using conversion script
+   - Keywords are automatically linked to keypoint files
 
-2. **Keyword Definitions** (`app/data/keypoint/*.md`): 72+ AI/LLM terminology files
+2. **Keyword Definitions** (`app/data/keypoint/*.md`): 75+ AI/LLM terminology files
    - Front matter format: `title`, `contexts` array
-   - Content designed for concept understanding and learning
+   - Content wrapped in `<Context name="contextName">` tags following ADR-001
+   - Core knowledge generated using specific conceptual understanding prompts
 
 ### Context System
 The project implements a sophisticated context categorization system for AI/LLM terminology:
@@ -46,6 +49,22 @@ npm run build
 npm start
 ```
 
+## Content Generation Commands
+
+The project includes a custom slash command system for content management:
+
+```bash
+# Generate core knowledge for all keypoint files
+/gen-core-knowledge
+```
+
+### Script Commands
+
+```bash
+# Convert YAML interview files to Markdown format
+node scripts/convert-yaml-to-md.js
+```
+
 ## Working with Content
 
 ### Adding New Keywords
@@ -53,6 +72,7 @@ npm start
 2. Use appropriate context from `app/data/context.md`
 3. Follow context validation: prefer `ai` unless ambiguity exists
 4. Test naturalness of `{context}文脈での{keyword}とは`
+5. Use `/gen-core-knowledge` command to generate core knowledge content
 
 ### Context Guidelines
 - **Use `ai`** for terms unique to AI/LLM domain
@@ -89,5 +109,25 @@ When updating keyword contexts or adding new terms, ensure:
 2. Consistency with ubiquitous language definitions
 3. Proper categorization in `app/data/context.md`
 4. Front matter format compliance
+5. Core knowledge generation using the exact prompt format specified in `doc/ubiquitous-language.md`
+
+### Core Knowledge Generation Prompt
+When generating core knowledge content, use this exact prompt format:
+
+```
+{context}文脈・分野における{keyword}について以下の条件を最短経路で満たせる説明をして
+
+- 応用が利く（新しい問題にも対応できる）
+- 長期的に記憶に残りやすい
+- 他の知識との関連付けができる
+- 「なぜ？」という問いに答えられる
+
+出力はMarkdown記法、見出し2は `## {keyword}`
+```
+
+### Data Flow
+1. **YAML Source** (`app/data/interviews/old/Q*.yaml`) → **Conversion Script** → **Markdown Files** (`app/data/interviews/Q*.md`)
+2. **Keyword Links** are automatically generated during conversion, pointing to keypoint files with `?context=ai` query parameters
+3. **Keypoint Files** contain context-specific content wrapped in `<Context>` tags for dynamic display
 
 The project prioritizes content accuracy and learning effectiveness over traditional software development patterns.
