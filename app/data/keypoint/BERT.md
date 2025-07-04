@@ -1,5 +1,0 @@
----
-title: BERT
-contexts:
-  - ai
----

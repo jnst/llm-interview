@@ -1,5 +1,0 @@
----
-title: GPT
-contexts:
-  - ai
----
